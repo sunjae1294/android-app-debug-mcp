@@ -1,0 +1,38 @@
+{
+  "name": "android-app-debug-mcp",
+  "version": "0.1.0",
+  "description": "MCP version of the Android debug skill. Exposes adb / emulator / logcat / screenshot / UI-tree as MCP tools; the host LLM (Claude Code) selects each UI action itself. No separate LLM API key required.",
+  "author": {
+    "name": "Team Marvis (SungKyunKwan University)",
+    "url": "https://marvis-ai.com/"
+  },
+  "homepage": "https://github.com/fclab-skku/android-app-debug-mcp",
+  "repository": "https://github.com/sunjae1294/android-app-debug-mcp.git",
+  "license": "MIT",
+  "keywords": [
+    "android",
+    "android-debug",
+    "android-testing",
+    "emulator",
+    "adb",
+    "logcat",
+    "gradle",
+    "ui-agent",
+    "mcp",
+    "claude-code",
+    "claude-skill",
+    "marvis"
+  ],
+  "mcpServers": {
+    "marvis-dev": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "${CLAUDE_PLUGIN_ROOT}",
+        "python",
+        "${CLAUDE_PLUGIN_ROOT}/scripts/server.py"
+      ]
+    }
+  }
+}

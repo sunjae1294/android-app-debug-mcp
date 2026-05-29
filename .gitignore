@@ -1,0 +1,23 @@
+# Local config (contains absolute SDK paths and per-user defaults)
+config.json
+
+# Run artifacts
+runs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Keep the bundled marvis parser bytecode (would otherwise match *.py[cod]).
+!scripts/marvis/*.pyc
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+.venv/

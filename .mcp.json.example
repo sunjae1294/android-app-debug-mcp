@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "marvis-dev": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--project",
+        "/ABSOLUTE/PATH/TO/android-app-debug-mcp",
+        "python",
+        "/ABSOLUTE/PATH/TO/android-app-debug-mcp/scripts/server.py"
+      ]
+    }
+  }
+}

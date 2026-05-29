@@ -1,0 +1,30 @@
+[project]
+name = "android-app-debug-mcp"
+version = "0.1.0"
+description = "MCP server for end-to-end Android debug sessions on an emulator."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = "==3.12.*"
+authors = [
+    { name = "Team Marvis (SungKyunKwan University)", email = "fclab.skku@gmail.com" },
+]
+keywords = [
+    "android",
+    "android-debug",
+    "emulator",
+    "adb",
+    "logcat",
+    "mcp",
+    "claude-code",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "pillow>=10.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/fclab-skku/android-app-debug-mcp"
+Repository = "https://github.com/sunjae1294/android-app-debug-mcp.git"
+
+[tool.uv]
+package = false
