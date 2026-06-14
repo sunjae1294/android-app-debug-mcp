@@ -84,10 +84,17 @@ def _make_run_dir(project_root: Optional[Path]) -> Path:
     return run_dir
 
 
-def _validate_project_root(project_root: Path) -> Path:
+def _validate_project_root(project_root: Path, *, require_gradle: bool = True) -> Path:
+    """Resolve ``project_root`` and, unless build is skipped, require it to be Gradle.
+
+    With ``require_gradle=False`` the directory only has to exist — it's used
+    purely as the run-dir parent, so any directory (including a tmp dir) works.
+    """
     project_root = Path(os.path.expanduser(str(project_root))).resolve()
     if not project_root.exists():
         raise RuntimeError(f"project_root does not exist: {project_root}")
+    if not require_gradle:
+        return project_root
     has_gradlew = (project_root / "gradlew").exists()
     has_settings = any(
         (project_root / name).exists()
@@ -240,6 +247,7 @@ def start_debug_session(
     avd: Optional[str] = None,
     serial: Optional[str] = None,
     sdk: Optional[str] = None,
+    skip_build: bool = False,
     skip_install: bool = False,
     skip_launch: bool = False,
 ) -> List[Any]:
@@ -249,19 +257,35 @@ def start_debug_session(
     Only one session may be active at a time; call ``finish_test`` or
     ``abort_session`` first if another session is already running.
     Hard caps ``max_steps`` at 20.
+
+    ``skip_build`` (default false) runs no Gradle build and skips the
+    Gradle-project check on ``project_root`` — use it to drive an app you
+    don't build here (e.g. boot the AVD and exercise an already-installed
+    Chrome to test a website). In this mode ``project_root`` only has to be
+    an existing directory (any folder, even a tmp dir) and is used solely as
+    the run-dir parent; ``gradle_task`` is ignored. Combine with
+    ``skip_install`` (no ``apk_path`` needed) to drive an already-installed
+    package, or pass ``apk_path`` to install a prebuilt APK without building.
     """
     config = load_config()
     sdk_root = Path(os.path.expanduser(sdk or config.get("android_sdk_path") or str(android_sdk_root())))
     avd_name = avd or config.get("default_avd_name")
 
-    project_root_p = _validate_project_root(Path(project_root))
+    project_root_p = _validate_project_root(Path(project_root), require_gradle=not skip_build)
     run_dir = _make_run_dir(project_root_p)
 
-    # 1. Build (or accept --apk-path).
+    # 1. Build, accept a prebuilt apk_path, or skip the build entirely.
+    apk_p: Optional[Path] = None
     if apk_path:
         apk_p = Path(os.path.expanduser(apk_path))
         if not apk_p.exists():
             raise RuntimeError(f"apk_path does not exist: {apk_p}")
+    elif skip_build:
+        if not skip_install:
+            raise RuntimeError(
+                "skip_build with no apk_path requires skip_install=True "
+                "(nothing to install when no APK is built or supplied)"
+            )
     else:
         try:
             apk_p = build_apk(project_root_p, gradle_task)
@@ -282,6 +306,8 @@ def start_debug_session(
 
     # 3. Install + launch.
     if not skip_install:
+        if apk_p is None:
+            raise RuntimeError("no APK to install; pass apk_path or skip_install=True")
         adb.install(apk_p)
     if not skip_launch:
         adb.force_stop(package)
@@ -332,7 +358,8 @@ def start_debug_session(
         action_meta={"name": "start_debug_session"},
         note=(
             f"run_dir={sess.run_dir} | "
-            f"device_resolution={dev_w}x{dev_h} | apk={apk_p}"
+            f"device_resolution={dev_w}x{dev_h} | "
+            f"apk={apk_p if apk_p is not None else '(none — build skipped)'}"
         ),
     )
 
