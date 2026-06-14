@@ -17,6 +17,13 @@ Tools live in the `android-app-debug` MCP server. Each tool's schema (parameters
 
 One structured task per invocation. Compose a task, start a session, loop through observations and actions, call `finish_test`. Surface the returned report to the user. Repeat for the next task.
 
+## Driving an app without building it
+
+`start_debug_session` builds from a Gradle `project_root` by default. To drive an app this server does not build — e.g. boot the AVD and exercise an already-installed Chrome to test a website — pass `skip_build=true`. In that mode no Gradle build runs and `project_root` is not required to be a Gradle project; it only has to be an existing directory, used solely as the run-dir parent (any folder, even a tmp dir, works). `gradle_task` is ignored.
+
+- **Drive an already-installed package**: `skip_build=true` + `skip_install=true` (no `apk_path` needed). Set `package` to the app to launch (e.g. `com.android.chrome`), or add `skip_launch=true` to attach without forcing a relaunch.
+- **Install a prebuilt APK without building**: `skip_build=true` + `apk_path=/path/to/app.apk`.
+
 ## Tools at a glance
 
 - **Lifecycle**: `precheck`, `start_debug_session`, `finish_test`, `abort_session`.
@@ -139,7 +146,7 @@ Run `python3 <skill-dir>/scripts/onboard.py` once interactively to write it.
 
 Default is a visible (windowed) emulator so the user can watch the run, catch issues that don't appear in logcat (visual artifacts, animations, focus changes), and intervene if anything goes wrong. The server never auto-starts emulators in headless mode.
 
-For headless (CI), start the AVD beforehand with `-no-window` and pass `skip_install` / `skip_launch` as appropriate to `start_debug_session`.
+For headless (CI), start the AVD beforehand with `-no-window` and pass `skip_build` / `skip_install` / `skip_launch` as appropriate to `start_debug_session`.
 
 ## Troubleshooting
 
